@@ -5,9 +5,8 @@ import (
 	"time"
 
 	"github.com/streadway/amqp"
-
-	"appengine"
-	"appengine/socket"
+	"golang.org/x/net/context"
+	"google.golang.org/appengine/socket"
 )
 
 const (
@@ -15,7 +14,7 @@ const (
 	defaultConnectionTimeout = 30 * time.Second
 )
 
-func appEngineDial(c appengine.Context) func(network, addr string) (net.Conn, error) {
+func appEngineDial(c context.Context) func(network, addr string) (net.Conn, error) {
 	return func(network, addr string) (net.Conn, error) {
 		conn, err := socket.DialTimeout(c, network, addr, defaultConnectionTimeout)
 		if err != nil {
@@ -30,7 +29,7 @@ func appEngineDial(c appengine.Context) func(network, addr string) (net.Conn, er
 	}
 }
 
-func Dialer(c appengine.Context) func(url string) (*amqp.Connection, error) {
+func Dialer(c context.Context) func(url string) (*amqp.Connection, error) {
 	return func(url string) (*amqp.Connection, error) {
 		return amqp.DialConfig(url, amqp.Config{
 			Heartbeat: defaultHeartbeat,
@@ -39,6 +38,6 @@ func Dialer(c appengine.Context) func(url string) (*amqp.Connection, error) {
 	}
 }
 
-func Dial(c appengine.Context, url string) (*amqp.Connection, error) {
+func Dial(c context.Context, url string) (*amqp.Connection, error) {
 	return Dialer(c)(url)
 }
