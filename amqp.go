@@ -1,6 +1,7 @@
 package gaeamqp
 
 import (
+	"crypto/tls"
 	"net"
 	"time"
 
@@ -38,6 +39,20 @@ func Dialer(c context.Context) func(url string) (*amqp.Connection, error) {
 	}
 }
 
+func DialerTLS(c context.Context) func(url string, amqps *tls.Config) (*amqp.Connection, error) {
+	return func(url string, amqps *tls.Config) (*amqp.Connection, error) {
+		return amqp.DialConfig(url, amqp.Config{
+			Heartbeat:       defaultHeartbeat,
+			Dial:            appEngineDial(c),
+			TLSClientConfig: amqps,
+		})
+	}
+}
+
 func Dial(c context.Context, url string) (*amqp.Connection, error) {
 	return Dialer(c)(url)
+}
+
+func DialTLS(c context.Context, url string, amqps *tls.Config) (*amqp.Connection, error) {
+	return DialerTLS(c)(url, amqps)
 }
